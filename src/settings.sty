@@ -1,0 +1,168 @@
+%%%%% フォント
+\ifxetex
+  \setCJKsansfont[BoldFont=HaranoAjiGothic-Bold.otf]{HaranoAjiGothic-Medium.otf}
+  \setCJKmonofont[BoldFont=HaranoAjiGothic-Bold.otf]{HaranoAjiGothic-Medium.otf}
+\else\fi
+\ifluatex
+  \setsansjfont[BoldFont=HaranoAjiGothic-Bold.otf]{HaranoAjiGothic-Medium.otf}
+  \setmonojfont[BoldFont=HaranoAjiGothic-Bold.otf]{HaranoAjiGothic-Medium.otf}
+\else\fi
+\usepackage[olddefault]{fontsetup}
+\setsansfont{nimbussans}
+\newcommand{\gs}{\sffamily}
+\usepackage{fontawesome5}
+
+
+
+%%%%% ページレイアウト
+\setpagelayout+{vmargin=10truemm, hmargin=15truemm, includemp, nomarginpar}
+
+
+
+%%%%% 色
+\usepackage{xcolor}
+\definecolor{myurlcolor}{HTML}{2a4f99}
+\definecolor{mycitecolor}{HTML}{2a4f99}
+\definecolor{mylinkcolor}{HTML}{2a4f99}
+
+
+
+%%%%% ハイパーリンク
+\usepackage{hyperref}
+\hypersetup{setpagesize=false, colorlinks=true, linkcolor=mylinkcolor, citecolor=mycitecolor, urlcolor=myurlcolor, pdfauthor={鴎海}}
+
+
+
+%%%%% 脚注
+\usepackage{footnote}
+
+
+
+%%%%% tcolorbox
+\usepackage{tcolorbox}
+\tcbuselibrary{skins}
+
+\newcommand{\infoitem}[1]{
+  \begin{tcolorbox}[%
+    enhanced,
+    size=minimal,
+    colback=white, coltitle=black,
+    frame hidden,
+    left*=0pt, right*=0pt%
+  ]
+    \begin{description}
+      #1
+    \end{description}
+  \end{tcolorbox}
+}
+
+
+
+%%%%% コマンド
+\NewDocumentCommand{\infotitle}{O{}m}{
+  \subsection*{#2}
+  \addcontentsline{toc}{subsection}{#2}
+  \makeatletter
+  \def\@currentlabelname{#2}
+  \makeatother
+  \ifblank{#1}{}{\label{#1}}
+}
+\NewDocumentCommand{\mytitle}{mmO{}}{
+  \title{\gs #1 {\normalsize (#2--#3)}}
+  \author{鴎海}
+  \date{\small （最終更新日：\today ）}
+  \maketitle
+}
+
+\newcommand{\myintro}[1]{
+  この文書では，#1の作品一覧を時系列順に示します．\href{https://github.com/kmi-ne/List-ComposersWorks/blob/main/pdf/Furrer,_Beat.pdf}{本pdfファイル}とその\href{https://github.com/kmi-ne/List-ComposersWorks/blob/main/src/Furrer,_Beat}{\TeX ソースファイル}の最新版は，\href{https://creativecommons.org/licenses/by-nc/4.0/}{CC BY-NC 4.0ライセンス}の下，この文中のリンク先で配布されています．情報提供や誤りなどのご指摘があれば，\href{https://github.com/kmi-ne/List-ComposersWorks/issues}{issueを立てる}か，何らかの手段で筆者までお伝えくださると幸いです．
+}
+
+\newcommand{\myytlist}[2]{
+  \section*{YouTubeプレイリスト}
+  \addcontentsline{toc}{section}{YouTubeプレイリスト}
+  \begin{description}
+    \item[通常版] \url{#1}
+    \item[簡易版] \url{#2} 
+  \end{description}
+}
+
+\ExplSyntaxOn
+\keys_define:nn { info } {
+  title .tl_set:N = \l_info_ttl_tl,
+  date .tl_set:N = \l_info_date_tl,
+  date_ref .tl_set:N = \l_info_dateref_tl,
+  premier .tl_set:N = \l_info_prm_tl,
+  premier_ref .tl_set:N = \l_info_prmref_tl,
+  instrumentation .tl_set:N = \l_info_inst_tl,
+  instrumentation_ref .tl_set:N = \l_info_instref_tl,
+  publisher .tl_set:N = \l_info_pbl_tl,
+  publisher_url .tl_set:N = \l_info_pblurl_tl,
+  recording_url .tl_set:N = \l_info_recurl_tl,
+  recording_nb .tl_set:N = \l_info_recnb_tl,
+  performence_video_url .tl_set:N = \l_info_pfmurl_tl,
+  performence_video_nb .tl_set:N = \l_info_pfmnb_tl,
+  score_video_url .tl_set:N = \l_info_scvurl_tl,
+  score_video_nb .tl_set:N = \l_info_scvnb_tl,
+  supplement .tl_set:N = \l_info_spl_tl
+}
+\NewDocumentCommand { \info } { mm } {
+  \savenotes
+  \group_begin:
+  \keys_set:nn { info } { #2 }
+  \noindent {\footnotesize 最終確認日：#1}
+  \tl_if_empty:NTF \l_info_date_tl {} {
+    \infoitem{ \item[作曲完了] \l_info_date_tl \textsuperscript{\l_info_dateref_tl} }
+  }
+  \tl_if_empty:NTF \l_info_prm_tl {} {
+    \infoitem{ \item[世界初演] \l_info_prm_tl \textsuperscript{\l_info_prmref_tl} }
+  }
+  \tl_if_empty:NTF \l_info_inst_tl {} {
+    \infoitem{ \item[編成] \l_info_inst_tl \textsuperscript{\l_info_instref_tl} }
+  }
+  \tl_if_empty:NTF \l_info_pbl_tl {} {
+    \tl_if_empty:NTF \l_info_pbl_tl {
+      \infoitem{ \item[出版社] \l_info_pbl_tl }
+    } {
+      \infoitem{ \item[出版社] \href{\l_info_pblurl_tl}{\l_info_pbl_tl} }
+    }
+  }
+  \infoitem{
+    \item[録音
+      \tl_if_empty:NTF \l_info_recurl_tl { \textsuperscript{\normalfont\textcolor{red}{\faTimesCircle}} } {}
+      \tl_if_empty:NTF \l_info_recnb_tl {} { \textsuperscript{\normalfont\textcolor{orange}{\faExclamationTriangle}} }
+    ]
+    \tl_if_empty:NTF \l_info_recurl_tl { --- } { \l_info_recurl_tl \tl_if_empty:NTF \l_info_recnb_tl {} { （\l_info_recnb_tl） }}
+  }
+  \infoitem{
+    \item[演奏動画
+      \tl_if_empty:NTF \l_info_pfmurl_tl { \textsuperscript{\normalfont\textcolor{red}{\faTimesCircle}} } {}
+      \tl_if_empty:NTF \l_info_pfmnb_tl {} { \textsuperscript{\normalfont\textcolor{orange}{\faExclamationTriangle}} }
+    ]
+    \tl_if_empty:NTF \l_info_pfmurl_tl { --- } { \l_info_pfmurl_tl \tl_if_empty:NTF \l_info_pfmnb_tl {} { （\l_info_pfmnb_tl） } }
+  }
+  \infoitem{
+    \item[楽譜動画
+      \tl_if_empty:NTF \l_info_scvurl_tl { \textsuperscript{\normalfont\textcolor{red}{\faTimesCircle}} } {}
+      \tl_if_empty:NTF \l_info_scvnb_tl {} { \textsuperscript{\normalfont\textcolor{orange}{\faExclamationTriangle}} }
+    ]
+    \tl_if_empty:NTF \l_info_scvurl_tl { --- } { \l_info_scvurl_tl \tl_if_empty:NTF \l_info_scvnb_tl {} { （\l_info_scvnb_tl） } }
+  }
+  \tl_if_empty:NTF \l_info_spl_tl {} {
+    \infoitem{ \item[補足] \l_info_spl_tl }
+  }
+  \group_end:
+  \spewnotes
+}
+\ExplSyntaxOff
+
+
+
+%%%%% 参考文献
+\usepackage[style=numeric, backend=biber, sortcites]{biblatex}
+\addbibresource{biblio.bib}
+\DeclareNameAlias{default}{family-given}
+\newcommand{\myprintbibliography}{
+  \nocite{*}
+  \printbibliography[title=参考文献, label=biblio, heading=bibintoc]
+}
