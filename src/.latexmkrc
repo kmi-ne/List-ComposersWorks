@@ -1,3 +1,7 @@
+use Cwd 'getcwd';
+use File::Basename;
+my $path = getcwd;
+$jobname = basename($path);
 $xelatex = 'xelatex %O -halt-on-error -file-line-error %S';
 $lualatex = 'lualatex %O -halt-on-error -file-line-error %S';
 $bibtex = 'upbibtex %O %B';
