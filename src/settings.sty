@@ -59,11 +59,11 @@
 
 
 %%%%% コマンド
-\NewDocumentCommand{\infotitle}{O{}m}{
+\NewDocumentCommand{\infotitle}{O{}mO{}}{
   \subsection*{#2}
   \addcontentsline{toc}{subsection}{#2}
   \makeatletter
-  \def\@currentlabelname{#2}
+  \ifblank{#3}{\def\@currentlabelname{#2}}{\def\@currentlabelname{#3}}
   \makeatother
   \ifblank{#1}{}{\label{#1}}
 }
