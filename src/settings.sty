@@ -59,13 +59,16 @@
 
 
 %%%%% コマンド
-\NewDocumentCommand{\infotitle}{O{}mO{}}{
-  \subsection*{#2}
-  \addcontentsline{toc}{subsection}{#2}
+% #1:更新日 #2:ラベル #3:タイトル #4:原題or英題
+% #5:ブックマーク $6:作曲完了年
+\NewDocumentCommand{\infotitle}{mO{}mmO{}m}{
+  \subsection*{#3\\ {\small #4} \hfill {\footnotesize 最終確認日：#1}}
+  \ifblank{#5}{\addcontentsline{toc}{subsection}{#3}}{\addcontentsline{toc}{subsection}{#5}}
+  \def\CurrentWorkYear{#6}
   \makeatletter
-  \ifblank{#3}{\def\@currentlabelname{#2}}{\def\@currentlabelname{#3}}
+  \def\@currentlabelname{#3\ (#6)}
   \makeatother
-  \ifblank{#1}{}{\label{#1}}
+  \ifblank{#2}{}{\label{#2}}
 }
 \NewDocumentCommand{\mytitle}{mmO{}}{
   \title{\gs #1 {\normalsize (#2--#3)}}
@@ -88,10 +91,11 @@
 }
 
 \ExplSyntaxOn
+\tl_new:N \l_info_increc_tl
+\tl_set:Nn \l_info_increc_tl {}
 \keys_define:nn { info } {
-  title .tl_set:N = \l_info_ttl_tl,
   date .tl_set:N = \l_info_date_tl,
-  date_ref .tl_set:N = \l_info_dateref_tl,
+  yeardate_ref .tl_set:N = \l_info_ydref_tl,
   premier .tl_set:N = \l_info_prm_tl,
   premier_ref .tl_set:N = \l_info_prmref_tl,
   instrumentation .tl_set:N = \l_info_inst_tl,
@@ -100,19 +104,24 @@
   publisher_url .tl_set:N = \l_info_pblurl_tl,
   recording_url .tl_set:N = \l_info_recurl_tl,
   recording_nb .tl_set:N = \l_info_recnb_tl,
+  recording_info .tl_set:N = \l_info_recinfo_tl,
   performence_video_url .tl_set:N = \l_info_pfmurl_tl,
   performence_video_nb .tl_set:N = \l_info_pfmnb_tl,
+  performence_video_info .tl_set:N = \l_info_pfminfo_tl,
   score_video_url .tl_set:N = \l_info_scvurl_tl,
   score_video_nb .tl_set:N = \l_info_scvnb_tl,
+  score_video_info .tl_set:N = \l_info_scvinfo_tl,
   supplement .tl_set:N = \l_info_spl_tl
 }
-\NewDocumentCommand { \info } { mm } {
+\NewDocumentCommand { \info } { m } {
   \savenotes
   \group_begin:
-  \keys_set:nn { info } { #2 }
-  \noindent {\footnotesize 最終確認日：#1}
+  \keys_set:nn { info } { #1 }
+  \tl_if_empty:NTF \l_info_date_tl {
+    \tl_set:Nn \l_info_date_tl { \CurrentWorkYear -xx-xx }
+  } {}
   \tl_if_empty:NTF \l_info_date_tl {} {
-    \infoitem{ \item[作曲完了] \l_info_date_tl \textsuperscript{\l_info_dateref_tl} }
+    \infoitem{ \item[作曲完了] \l_info_date_tl \textsuperscript{\l_info_ydref_tl} }
   }
   \tl_if_empty:NTF \l_info_prm_tl {} {
     \infoitem{ \item[世界初演] \l_info_prm_tl \textsuperscript{\l_info_prmref_tl} }
@@ -132,21 +141,33 @@
       \tl_if_empty:NTF \l_info_recurl_tl { \textsuperscript{\normalfont\textcolor{red}{\faTimesCircle}} } {}
       \tl_if_empty:NTF \l_info_recnb_tl {} { \textsuperscript{\normalfont\textcolor{orange}{\faExclamationTriangle}} }
     ]
-    \tl_if_empty:NTF \l_info_recurl_tl { --- } { \l_info_recurl_tl \tl_if_empty:NTF \l_info_recnb_tl {} { （\l_info_recnb_tl） }}
+    \tl_if_empty:NTF \l_info_recurl_tl { --- } {
+      \l_info_recurl_tl
+      \tl_if_empty:NTF \l_info_recnb_tl {} { \\ \l_info_recnb_tl}
+      \tl_if_empty:NTF \l_info_recinfo_tl {} { \\ \l_info_recinfo_tl}
+    }
   }
   \infoitem{
     \item[演奏動画
       \tl_if_empty:NTF \l_info_pfmurl_tl { \textsuperscript{\normalfont\textcolor{red}{\faTimesCircle}} } {}
       \tl_if_empty:NTF \l_info_pfmnb_tl {} { \textsuperscript{\normalfont\textcolor{orange}{\faExclamationTriangle}} }
     ]
-    \tl_if_empty:NTF \l_info_pfmurl_tl { --- } { \l_info_pfmurl_tl \tl_if_empty:NTF \l_info_pfmnb_tl {} { （\l_info_pfmnb_tl） } }
+    \tl_if_empty:NTF \l_info_pfmurl_tl { --- } {
+      \l_info_pfmurl_tl
+      \tl_if_empty:NTF \l_info_pfmnb_tl {} { \\ \l_info_pfmnb_tl}
+      \tl_if_empty:NTF \l_info_pfminfo_tl {} { \\ \l_info_pfminfo_tl}
+    }
   }
   \infoitem{
     \item[楽譜動画
       \tl_if_empty:NTF \l_info_scvurl_tl { \textsuperscript{\normalfont\textcolor{red}{\faTimesCircle}} } {}
       \tl_if_empty:NTF \l_info_scvnb_tl {} { \textsuperscript{\normalfont\textcolor{orange}{\faExclamationTriangle}} }
     ]
-    \tl_if_empty:NTF \l_info_scvurl_tl { --- } { \l_info_scvurl_tl \tl_if_empty:NTF \l_info_scvnb_tl {} { （\l_info_scvnb_tl） } }
+    \tl_if_empty:NTF \l_info_scvurl_tl { --- } {
+      \l_info_scvurl_tl
+      \tl_if_empty:NTF \l_info_scvnb_tl {} { \\ \l_info_scvnb_tl}
+      \tl_if_empty:NTF \l_info_scvinfo_tl {} { \\ \l_info_scvinfo_tl}
+    }
   }
   \tl_if_empty:NTF \l_info_spl_tl {} {
     \infoitem{ \item[補足] \l_info_spl_tl }
@@ -166,3 +187,4 @@
   \nocite{*}
   \printbibliography[title=参考文献, label=biblio, heading=bibintoc]
 }
+\NewDocumentCommand{\supcite}{O{}m}{\ifblank{#1}{\textsuperscript{\cite{#2}}}{\textsuperscript{\cite[#1]{#2}}}}
