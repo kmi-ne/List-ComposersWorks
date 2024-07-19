@@ -28,6 +28,7 @@
 
 
 %%%%% ハイパーリンク
+\usepackage{xurl}
 \usepackage{hyperref}
 \hypersetup{setpagesize=false, colorlinks=true, linkcolor=mylinkcolor, citecolor=mycitecolor, urlcolor=myurlcolor, pdfauthor={鴎海}}
 
@@ -143,8 +144,16 @@
     ]
     \tl_if_empty:NTF \l_info_recurl_tl { --- } {
       \l_info_recurl_tl
-      \tl_if_empty:NTF \l_info_recnb_tl {} { \\ \l_info_recnb_tl}
-      \tl_if_empty:NTF \l_info_recinfo_tl {} { \\ \l_info_recinfo_tl}
+      \tl_if_empty:NTF \l_info_recnb_tl {} {
+        \tl_if_in:NnTF \l_info_recurl_tl { \enddescription } {} { \\ }
+        \l_info_recnb_tl
+      }
+      \tl_if_empty:NTF \l_info_recinfo_tl {} {
+        \tl_if_in:NnTF \l_info_recurl_tl { \enddescription } {
+          \tl_if_empty:NTF \l_info_recnb_tl {} { \\ }
+        } { \\ }
+        \l_info_recinfo_tl
+      }
     }
   }
   \infoitem{
